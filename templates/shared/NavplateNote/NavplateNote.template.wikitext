@@ -1,0 +1,5 @@
+<!-- this code is shared with multiple wikis, please edit the module in https://github.com/utgwiki/wikiwire instead of here.
+any changes made here will be overwritten without warning -->
+<includeonly>{{#invoke:NavplateNote|navplate}}</includeonly><noinclude>
+{{/doc|Navplate/doc}}
+</noinclude>

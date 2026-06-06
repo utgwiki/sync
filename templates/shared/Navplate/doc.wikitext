@@ -1,0 +1,116 @@
+<!-- this code is shared with multiple wikis, please edit the module in https://github.com/utgwiki/wikiwire instead of here.
+any changes made here will be overwritten without warning -->Navplate allows a navigational template to be set up relatively quickly by supplying it with one or more lists of links, similar to [https://en.wikipedia.org/wiki/Template:Navbox Template:Navbox] on Wikipedia.
+
+== Usage ==
+Please remove the parameters that are left blank.
+
+<pre>
+{{Navplate
+|subtitle = 
+|title = 
+
+|label1 = 
+|list1 = 
+
+|label2 = 
+|list2 = 
+
+|label3 = 
+|list3 = 
+}}
+</pre>
+
+== Parameter list ==
+;<code>subtitle</code>
+:Subtitle text above the title, it should be connected to the title
+
+;<code>title</code>
+:Title of the subject (wikilink is optional)
+
+;<code>label<sub>n</sub></code>
+:Label text for the list
+
+;<code>list<sub>n</sub></code>
+:Text listing wikilinks
+
+;<code>header<sub>n</sub></code>
+:Group header text
+
+;<code>id</code>
+:ID used for HTML, mostly used in template
+
+== Example ==
+<pre><nowiki>
+{{Navplate
+|id=test
+|subtitle=List of
+|title=Title
+|header1 = Header 1
+|label2 = Label 1
+|list2 = [[Item 1]][[Item 2]]
+|label3 = Label 2
+|list3 = [[Item 1]][[Item 2]]
+|header4 = Header 2
+|label5 = Label 3
+|list5 = [[Item 1]][[Item 2]]
+|label6 = Label 4
+|list6 = [[Item 1]][[Item 2]]
+}}
+</nowiki></pre>
+
+gives
+
+{{Navplate
+|id=test
+|subtitle=List of
+|title=Title
+|header1 = Header 1
+|label2 = Label 1
+|list2 = [[Item 1]][[Item 2]]
+|label3 = Label 2
+|list3 = [[Item 1]][[Item 2]]
+|header4 = Header 2
+|label5 = Label 3
+|list5 = [[Item 1]][[Item 2]]
+|label6 = Label 4
+|list6 = [[Item 1]][[Item 2]]
+}}
+
+== TemplateData ==
+<templatedata>
+{
+	"params": {
+		"title": {
+			"label": "Title",
+			"description": "Title of the subject (wikilink is optional)",
+			"example": "[[Ship]]s",
+			"type": "unknown",
+			"required": true,
+			"suggested": true
+		},
+		"id": {
+			"label": "ID",
+			"description": "ID used for HTML"
+		},
+		"subtitle": {
+			"label": "Subtitle",
+			"description": "Subtitle text above the title, it should be connected to the title",
+			"example": "List of",
+			"type": "string",
+			"suggested": true
+		}
+	},
+	"description": "Creates a navigational box for links to other pages.",
+	"paramOrder": [
+		"subtitle",
+		"title",
+		"id"
+	],
+	"format": "block"
+}
+</templatedata>
+
+<includeonly>
+<!-- Template catergories go here -->
+[[Category:Navplates]]
+</includeonly>

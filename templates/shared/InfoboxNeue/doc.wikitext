@@ -1,0 +1,68 @@
+<!-- this code is shared with multiple wikis, please edit the module in https://github.com/utgwiki/wikiwire instead of here.
+any changes made here will be overwritten without warning -->
+InfoboxNeue is a general use infobox template which uses [[Module:InfoboxNeue]].
+
+=== Usage ===
+<syntaxhighlight>
+{{InfoboxNeue
+| snippet           = <!-- Text that goes after "Quick facts: ", defaults to the page's root name -->
+| image             = <!-- File name without namespace prefix -->
+| indicator         = <!-- Indicator data, required for the other indicator arguments -->
+| indicatorClass    = <!-- Indicator class -->
+| title             = <!-- The title -->
+| subtitle          = <!-- The subtitle -->
+
+| sectionX          = <!-- Section X' title -->
+| section-subtitleX = <!-- Section X' subtitle -->
+| section-colX      = <!-- Amount of columns in section X, defaults to 2 -->
+<!-- or -->
+| col               =
+| labelY            = <!-- The label of item Y under section X, there mustn't be others with the same index (Y) -->
+| contentY          = <!-- The content of item Y, is required for each label --> 
+}}
+</syntaxhighlight>
+
+=== Example ===
+<syntaxhighlight>
+{{InfoboxNeue
+| indicator         = Indicator
+| image             = Pico_at_New_Babbage_1_1.jpg
+
+| title             = Hello world
+| subtitle          = Lorem ipsum
+
+| section1          = 1st section
+| section-subtitle1 = 1st section's subtitle
+| label1            = 1st item's label
+| content1          = item's content
+
+| section2          = 2nd section
+| section-subtitle2 = 2nd section's subtitle
+| label2            = 1st item's label
+| content2          = 1st item's content
+| label3            = 2nd item's label
+| content3          = 2nd item's content
+}}
+</syntaxhighlight>
+
+{{InfoboxNeue
+| indicator         = Indicator
+| image             = Pico_at_New_Babbage_1_1.jpg
+
+| title             = Hello world
+| subtitle          = Lorem ipsum
+
+| section1          = 1st section
+| section-subtitle1 = 1st section's subtitle
+| label1            = 1st item's label
+| content1          = item's content
+
+| section2          = 2nd section
+| section-subtitle2 = 2nd section's subtitle
+| label2            = 1st item's label
+| content2          = 1st item's content
+| label3            = 2nd item's label
+| content3          = 2nd item's content
+}}
+
+<includeonly>[[Category:Infobox templates]]</includeonly>

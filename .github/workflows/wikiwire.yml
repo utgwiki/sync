@@ -1,0 +1,25 @@
+name: WikiWire Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'modules/**'
+      - 'templates/**'
+      - 'mediawiki/**'
+  workflow_dispatch:
+
+jobs:
+  wikiwire:
+    runs-on: ubuntu-latest
+    name: Sync files to upstream MediaWiki
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: utgwiki/wikiwire@main
+        with:
+          sync_all: "true"
+          username: 'SplatchedSync@WikiWireBot' 
+          password: ${{ secrets.WIKI_PASSWORD }}  

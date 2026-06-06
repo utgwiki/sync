@@ -1,0 +1,109 @@
+/* this code is shared with another wiki, please edit the stylesheet in https://github.com/utgwiki/wikiwire instead of here.
+any changes made here will be overwritten without warning */
+
+.mpdiscover a, .mpdiscover > .fakeselflink { flex: 1 1 calc(100% / 5 - 5px) }
+.aboutgame .mpdiscover a { flex-grow: 1; width: 25% }
+
+@media screen and (max-width: 700px) {
+    .mpdiscover a, .mpdiscover > .fakeselflink {
+        flex-grow: 1; width: calc(50% - 5px); 
+    }
+}
+
+.mpdiscover .box2.socialbutton { display: inline-block; width: 100%!important; height: auto!important; font-size: var(--font-size-x-large); font-weight: bold }
+
+.mpdiscover .fakeselflink .socialbutton::before,
+.mpdiscover .socialbutton::before,
+.mpdiscover .fakeselflink .socialbutton,
+.mpdiscover .socialbutton {
+	transition: .25s filter, .25s transform
+}
+
+.mpdiscover .fakeselflink .socialbutton::before,
+.mpdiscover .socialbutton:hover::before { 
+    filter: var(--teaclock);
+	--teaclock: drop-shadow(0px 0px 0px oklch(0.237 0.0471 var(--color-progressive-oklch__l)))
+}
+
+.mpdiscover .fakeselflink .socialbutton,
+.mpdiscover .socialbutton:hover { transform: translateY(5px) }
+
+.mpdiscover .socialbutton span { transition: .25s text-shadow }
+
+.mpdiscover .socialbutton:hover::before {
+    background-image: linear-gradient(135deg,var(--border-color-base,#fff) 25%,transparent 25%,transparent 50%,var(--border-color-base,#fff) 50%,var(--border-color-base,#fff) 75%,transparent 75%,transparent);
+    background-size: 1.4285714em 1.4285714em;
+    animation: oo-ui-pendingElement-stripes 3s linear infinite;
+}
+
+.mpdiscover .socialbutton:hover span { text-shadow: -1px 0 .2em #fff, 0 1px .2em #fff, 1px 0 .2em #fff, 0 -1px .2em #fff; }
+
+html.skin-theme-clientpref-night .mpdiscover .socialbutton:hover span { text-shadow: -1px 0 .2em #000, 0 1px .2em #000, 1px 0 .2em #000, 0 -1px .2em #000; }
+
+/* .mpdiscover .fakeselflink .socialbutton span,
+.mpdiscover .socialbutton:hover span { filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.3)); } */
+
+@media screen and (min-width: 1119px) { 
+	.page-Dev_Wiki .page-actions, 
+    .page-Legacy_Wiki .page-actions { margin: auto } 
+
+	.page-Dev_Wiki .citizen-page-header-inner, 
+    .page-Legacy_Wiki .citizen-page-header-inner { border-top: var(--border-subtle); }
+
+    .page-Dev_Wiki .citizen-page-header,
+    .page-Legacy_Wiki .citizen-page-header { min-width: auto!important; width: 100%!important; max-width: unset!important; } 
+
+    .page-Dev_Wiki .citizen-page-header-inner,
+    .page-Legacy_Wiki .citizen-page-header-inner { width: 100%!important } 
+}
+
+.page-Dev_Wiki .citizen-body-container,
+.page-Legacy_Wiki .citizen-body-container { order: -1 }
+
+body:not(.ns-0) .citizen-page-header { margin-bottom: 20px }
+
+.mpdiscover > *:not(.fakeselflink) .socialbutton.main { 
+    --hueshiftvalue: 261.78;
+}
+
+.mpdiscover > *:not(.fakeselflink) .socialbutton.legacy { 
+    --hueshiftvalue: 149.92;
+}
+
+.mpdiscover > *:not(.fakeselflink) .socialbutton.dev { 
+    --hueshiftvalue: 46;
+}
+
+.mpdiscover > *:not(.fakeselflink) .socialbutton.community { 
+    --hueshiftvalue: 199.63;
+}
+
+.mpdiscover > *:not(.fakeselflink) .socialbutton.farm { 
+    --hueshiftvalue: 96;
+}
+
+.mpdiscover .socialbutton { position: relative; width: 55px; height: calc(55px - 5px); 
+    text-align: center; 
+    padding: 10px;
+    filter: hue-rotate(0deg);
+    color: var(--fixedlinkcolor);
+
+    --unhovered: oklch(0.3349 0.1 var(--hueshiftvalue, var(--color-progressive-oklch__h)));
+    --hueshift: oklch(from var(--color-surface-4) l c var(--hueshiftvalue, h));
+    --fixedlinkcolor: oklch(from var(--color-link) l c var(--hueshiftvalue, h));
+}
+
+.mpdiscover .socialbutton::before {
+    border-radius: var(--border-radius-medium); 
+    background: var(--hueshift); 
+    border: 1px solid var(--unhovered);
+    filter: drop-shadow(0px 5px 0px var(--unhovered));
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    content: '';
+    z-index: -1;
+}
+
+.mpdiscover .socialbutton img { width: 100%; height: 100%; object-fit: contain; border-radius: 0!important; transition: .25s transform }
+.mpdiscover .socialbutton:active img { transform: translateY(5px); }

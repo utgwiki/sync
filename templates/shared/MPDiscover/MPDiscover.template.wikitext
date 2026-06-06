@@ -1,0 +1,26 @@
+<!-- this code is shared with another wiki, please edit the template in https://github.com/utgwiki/wikiwire instead of here.
+any changes made here will be overwritten without warning --><div class="mpdiscover" style="display: flex; flex-direction: row; width: 100%; gap: 5px; margin-bottom: 10px; flex-wrap: wrap"><!--
+-->{{#vardefine: recode | <span class="box2 socialbutton main"><span>Recode</span></span> }}
+{{#vardefine: legacy | <span class="box2 socialbutton legacy"><span>Legacy</span></span> }}
+{{#vardefine: dev | <span class="box2 socialbutton dev"><span>Dev</span></span> }}
+{{#vardefine: community | <span class="box2 socialbutton community"><span>Community</span></span> }}
+{{#vardefine: farm | <span class="box2 socialbutton farm"><span>Farm</span></span> }}<!--
+
+
+-->{{#ifeq: {{FULLPAGENAME}} | Untitled Tag Game Wiki | <div class="fakeselflink">{{#var:recode}}</div>
+    | [[mh:utg:Untitled Tag Game Wiki|{{#var:recode}}]]
+   }}<!--
+   
+-->{{#ifeq: {{FULLPAGENAME}} | Legacy:Wiki | <div class="fakeselflink">{{#var:legacy}}</div>
+    | [[mh:utg:Legacy:Wiki|{{#var:legacy}}]]
+   }}<!--
+   
+-->{{#ifeq: {{FULLPAGENAME}} | Dev:Wiki | <div class="fakeselflink">{{#var:dev}}</div>
+    | [[mh:utg:Dev:Wiki|{{#var:dev}}]]
+   }}<!--
+   
+-->{{#ifeq: {{SERVERNAME}} | farm.miraheze.org | <div class="fakeselflink">{{#var:farm}}</div>
+    | [[mh:farm|{{#var:farm}}]]
+   }}<!--
+
+--></div><templatestyles src="MPDiscover/styles.css"/>
