@@ -1,5 +1,8 @@
 # WikiWire specification
 
+> [!NOTE]  
+> WikiWire is currently experimental. Please use cautiously and avoid potentially destructive configurations such as `sync_all` and consider experimenting with `dry_run`s first. 
+
 WikiWire is a GitHub Action that syncs changed files under `modules/` and `templates/` to a MediaWiki site via the [Action API](https://www.mediawiki.org/wiki/API:Action_API). Credentials are supplied only through the action inputs (or workflow secrets), never through the config file.
 
 ## Recommended repository layout
