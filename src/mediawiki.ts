@@ -129,7 +129,7 @@ export class MediaWikiSession {
 
       if (res.status === 403) {
         hint =
-          ' (403 usually means the HTTP layer blocked the request—wrong URL, bot/WAF rules, IP allowlist, or missing Host/HTTPS—not a MediaWiki API error code.)';
+          ' (403 usually means the HTTP layer blocked the request—wrong URL, bot/WAF rules, IP allowlist, or missing Host/HTTPS—not a MediaWiki API error code. If your wiki is behind a service like Cloudflare and its Bot Fight Mode, you may need to disable it or programmatically enable access overwrites with something like xiaotianxt/bypass-cloudflare-for-github-action)';
       }
 
       throw new Error(`WikiWire: ${bits.join('; ')}. ${body_note}${hint}`);
