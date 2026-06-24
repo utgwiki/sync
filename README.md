@@ -7,7 +7,7 @@ WikiWire is a GitHub Action that syncs files under `modules/` and `templates/` i
 
 WikiWire was developed by the Obby Wiki to streamline sharing modules across not only GitHub and MediaWiki, but also across multiple wikis. While complex, it is possible to transpile Luau to Lua 5.1 and upload it via this tool, as seen in [`obbywiki/modules`](https://github.com/obbywiki/modules).
 
-# Compatibility Matrix
+# Compatibility
 
 | MediaWiki Version | Supported |
 | ------- | ------------------ |
@@ -171,6 +171,16 @@ After completing every step above, you should be ready to test WikiWire. Make an
 If you are having trouble setting up WikiWire, use our repository as a guide: https://github.com/obbywiki/modules.
 
 Some aspects such as Cloudflare's Bot Fight Mode can interfere with the Action API.
+
+# Reference
+
+## Errors
+
+Most of the errors in WikiWire will be prefixed with a type.
+
+* "WikiWire config error" -> an issue with your configuration only (wikiwire.toml, .wikiwireignore)
+* "WikiWire API error" -> there was an issue contacting the MW API
+* "WikiWire content model error" -> an error with a content model (e.g., a module not under modules/)
 
 # WikiWire Specification
 
