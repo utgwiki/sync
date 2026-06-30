@@ -1,3 +1,7 @@
+---
+icon: lucide/cog
+---
+
 # .wikiwireignore Reference
 
 Optional file at the repository root (override with `ignore_path`). Patterns are relative to the repo root and follow **.gitignore** semantics (comments `#`, blank lines ignored; `**` and negation supported via the `ignore` package).

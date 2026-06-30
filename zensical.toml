@@ -44,10 +44,14 @@ Copyright &copy; 2026 <a href="https://obby.wiki">Obby Wiki</a>
 # can be defined using TOML syntax.
 #
 # Read more: https://zensical.org/docs/setup/navigation/
-# nav = [
-#   { "Get started" = "index.md" },
-#   { "Markdown in 5min" = "markdown.md" },
-# ]
+
+nav = [
+  { "Get started" = "index.md" },
+  { "wikiwire.toml Reference" = "wikiwire-toml-reference.md" },
+  { ".wikiwireignore Reference" = "wikiwire-ignore-reference.md" },
+  { "Bypassing Cloudflare" = "bypassing-cloudflare.md" },
+  { "Minification" = "minification.md" },
+]
 
 # With the "extra_css" option you can add your own CSS styling to customize
 # your Zensical project according to your needs. You can add any number of
