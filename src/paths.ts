@@ -14,6 +14,19 @@ export type mapped_site = {
 
 export type mapped_path = mapped_shared | mapped_site;
 
+// strips an optional repo label prefix (e.g. `imported:`, `Module:`) from a container folder name
+export function wiki_name_from_root(root_name : string) : string {
+    const colon = root_name.indexOf(':');
+    if (colon === -1) { return root_name };
+
+    const wiki_name = root_name.slice(colon + 1);
+    if (wiki_name.length === 0) {
+        throw new Error( `WikiWire: invalid root name "${root_name}" (label prefix must be followed by a wiki name). Please note that labels (Label:ModuleName) are ignored on sync.` );
+    };
+
+    return wiki_name;
+};
+
 export function content_model_for_repo_subfile(rel_under_root : string, css_content_model : string, opts : { allow_scribunto: boolean }) : string {
     if (opts.allow_scribunto) {
         // any more cases and this should be a switch
@@ -47,16 +60,17 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
     const path_segment = parts[1];
     const is_shared = path_segment === 'shared';
     const root_name = parts[2];
+    const wiki_name = wiki_name_from_root(root_name);
     const rest = parts.slice(3);
     const rel_under_root = rest.join('/');
 
     if (root === 'modules') {
         if (rel_under_root.endsWith('.template.wikitext')) { throw new Error( `WikiWire: ${relative_path}: .template.wikitext belongs under templates/, not modules/`, ); };
 
-        if (rel_under_root === `${root_name}.module.lua` || rel_under_root === `${root_name}.module.luau`) {
+        if (rel_under_root === `${wiki_name}.module.lua` || rel_under_root === `${wiki_name}.module.luau`) {
             return {
                 is_shared,
-                title: `Module:${root_name}`,
+                title: `Module:${wiki_name}`,
                 content_model: 'scribunto',
                 kind: 'module',
             };
@@ -65,7 +79,7 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
         if (rel_under_root === 'doc.wikitext') {
             return {
                 is_shared,
-                title: `Module:${root_name}/doc`,
+                title: `Module:${wiki_name}/doc`,
                 content_model: 'wikitext',
                 kind: 'module',
             };
@@ -77,7 +91,7 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
 
         return {
             is_shared,
-            title: `Module:${root_name}/${rel_under_root}`,
+            title: `Module:${wiki_name}/${rel_under_root}`,
             content_model,
             kind: 'module',
         };
@@ -85,10 +99,10 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
 
     // only other root possible is 'templates'
 
-    if (rel_under_root === `${root_name}.template.wikitext`) {
+    if (rel_under_root === `${wiki_name}.template.wikitext`) {
         return {
             is_shared,
-            title: `Template:${root_name}`,
+            title: `Template:${wiki_name}`,
             content_model: 'wikitext',
             kind: 'template',
         };
@@ -97,7 +111,7 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
     if (rel_under_root === 'doc.wikitext') {
         return {
             is_shared,
-            title: `Template:${root_name}/doc`,
+            title: `Template:${wiki_name}/doc`,
             content_model: 'wikitext',
             kind: 'template',
         };
@@ -107,7 +121,7 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
 
     return {
         is_shared,
-        title: `Template:${root_name}/${rel_under_root}`,
+        title: `Template:${wiki_name}/${rel_under_root}`,
         content_model,
         kind: 'template',
     };

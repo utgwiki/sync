@@ -203,6 +203,8 @@ The same 1:1 rule applies under `templates/<path_segment>/<root>/` for every pat
 
 Templates synced to `Template:` must live under `templates/`, not `modules/`. You can still use regular wikitext files under a template root like any other subpath.
 
+Labels will be ignored on sync. Anything before the first colon (`:`) is considered a label (e.g., 'Label:Name' will simply be 'Name', which will then be synced to Module:Name because it is under the modules/ folder). This only counts for the first colon, and anything after will still be passed. This makes it easier to mark modules as imported while still syncing them.
+
 ### Content models (non-special files under `modules/`)
 
 Suffix matching is ordered; the first match wins:
