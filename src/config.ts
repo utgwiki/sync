@@ -8,6 +8,7 @@ export type site_config = {
 
   default_branch : string | null;
   css_content_model : string;
+  common : boolean;
 };
 
 // toml configs arent typed
@@ -20,16 +21,18 @@ type site_entry = {
   default_branch ?: unknown;
   css_content_model ?: unknown;
   host ?: unknown;
+  common ?: unknown;
 };
 
 
 type root_config = {
   version ?: unknown;
   shared ?: unknown;
+  common ?: unknown;
   sites ?: unknown;
 };
 
-export function load_config(config_path : string) : { schema_version : number; shared : boolean; sites : Map<string, site_config>; path_to_site : Map<string, site_config> } {
+export function load_config(config_path : string) : { schema_version : number; shared : boolean; common : boolean; sites : Map<string, site_config>; path_to_site : Map<string, site_config> } {
     const raw = fs.readFileSync(config_path, 'utf8');
     const data = TOML.parse(raw) as root_config;
 
@@ -39,6 +42,7 @@ export function load_config(config_path : string) : { schema_version : number; s
     const path_to_site = new Map<string, site_config>();
 
     const shared_enabled = Boolean(data.shared);
+    const common_enabled = Boolean(data.common);
 
     for (const entry of data.sites) {
         const s = entry as site_entry;
@@ -53,7 +57,8 @@ export function load_config(config_path : string) : { schema_version : number; s
             default_branch: typeof s.default_branch === 'string' ? s.default_branch : null,
             css_content_model: typeof s.css_content_model === 'string' ? s.css_content_model : 'sanitized-css',
 
-            dry_run : Boolean(s.dry_run)
+            dry_run : Boolean(s.dry_run),
+            common : Boolean(s.common),
         };
 
 
@@ -65,6 +70,7 @@ export function load_config(config_path : string) : { schema_version : number; s
 
         if (path_segment.length === 0) { throw new Error(`WikiWire: site "${s.id}" host must not be empty`); };
         if (shared_enabled && path_segment === 'shared') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "shared" when shared = true (reserved for modules/shared and templates/shared)`, ); };
+        if (common_enabled && path_segment === 'common') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "common" when common = true (reserved for modules/common and templates/common)`, ); };
 
         if (path_to_site.has(path_segment)) {
             const other = path_to_site.get(path_segment);
@@ -81,6 +87,7 @@ export function load_config(config_path : string) : { schema_version : number; s
     return { 
         schema_version: typeof data.version === 'number' ? data.version : 1,
         shared: shared_enabled,
+        common: common_enabled,
         sites,
         path_to_site
     };

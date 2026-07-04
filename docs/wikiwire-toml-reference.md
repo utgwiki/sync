@@ -22,6 +22,14 @@ Whether to enable the shared sites folder or not. If set to false, WikiWire will
 shared = false
 ```
 
+## common (boolean)
+
+Whether to enable the common sites folder or not. If set to false, WikiWire will throw an error whenever it reads the /common directory of modules/ or templates/. When enabled, content is synced only to `[[sites]]` entries that set `common = true`.
+
+```
+common = false
+```
+
 ## [[sites]] (repeatable) (required)
 
 A `[[sites]]` defines a site. At minimum one of these entries must be provided.
@@ -32,7 +40,7 @@ Stable site key (sessions, logs). Must be unique across rows.
 
 ### host (string)
 
-Directory name under modules/ and templates/. If omitted, defaults to id. Must be unique across sites. Cannot be shared when shared = true (that name is reserved).
+Directory name under modules/ and templates/. If omitted, defaults to id. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved).
 
 ### api (string) (required)
 
@@ -50,6 +58,10 @@ If set, the action skips syncing when the workflow ref is not this branch (e.g. 
 
 Content model for `*.css` files under modules/ and templates/. Default is `sanitized-css`. Some wikis need `css`.
 
+### common (boolean)
+
+If true, this site receives content from `modules/common/` and `templates/common/` when top-level `common = true`. Default false.
+
 # Configuration example
 
 ```yaml
@@ -58,11 +70,13 @@ Content model for `*.css` files under modules/ and templates/. Default is `sanit
 
 version = 1
 shared = true
+common = true
 
 [[sites]]
 id = "obbywiki"
 host = "obby.wiki"
 api = "https://obby.wiki/api.php"
+common = true
 
 [[sites]]
 id = "dev"

@@ -58,7 +58,7 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
     };
 
     const path_segment = parts[1];
-    const is_shared = path_segment === 'shared';
+    const is_shared = path_segment === 'shared' || path_segment === 'common';
     const root_name = parts[2];
     const wiki_name = wiki_name_from_root(root_name);
     const rest = parts.slice(3);

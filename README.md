@@ -53,6 +53,12 @@ Ideally `<host|id>` is the site’s `host` in `wikiwire.toml`, but it can also b
 > 
 > If you want to name a subfolder "shared" but don't want to trigger WikiWire, name the folder `_shared` instead. 
 > Any path under `modules/` or `templates/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
+>
+> The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/` and `templates/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title). Use `common/` for things like Module:Arguments.
+>
+> If the `common` option is disabled or false in `wikiwire.toml`, the action will error when reading from `common/`.
+>
+> If you want to name a subfolder "common" but don't want to trigger WikiWire, name the folder `_common` instead.
 
 
 An example from the ObbyWiki's repository structure:
@@ -249,17 +255,19 @@ Place at the repository root unless you override with the `config_path` action i
 |-----|------|----------|-------------|
 | `version` | integer | no | Config schema version; default `1`. Reserved for future use. |
 | `shared` | boolean | no | If true, enables `modules/shared/` and `templates/shared/`, synced to every `[[sites]]` entry. Default false. |
+| `common` | boolean | no | If true, enables `modules/common/` and `templates/common/`. Synced only to `[[sites]]` entries with `common = true`. Default false. |
 
 ### `[[sites]]` (repeatable)
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `id` | string | yes | Stable site key (sessions, logs). Must be unique across rows. |
-| `host` | string | no | Directory name under `modules/` and `templates/`. If omitted, defaults to `id`. Must be unique across sites. Cannot be `shared` when `shared = true` (that name is reserved). |
+| `host` | string | no | Directory name under `modules/` and `templates/`. If omitted, defaults to `id`. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved). |
 | `api` | string | yes | Full MediaWiki API URL, e.g. `https://example.org/w/api.php`. |
 | `dry_run` | boolean | no | If true, only log planned edits; no `action=edit` requests for this site. |
 | `default_branch` | string | no | If set, the action skips syncing when the workflow ref is not this branch (e.g. `refs/heads/main`). |
 | `css_content_model` | string | no | Content model for `*.css` files under `modules/` and `templates/`. Default `sanitized-css`. Some wikis need `css`. |
+| `common` | boolean | no | If true, this site receives content from `modules/common/` and `templates/common/` when top-level `common = true`. Default false. |
 
 Example:
 

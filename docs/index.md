@@ -56,6 +56,12 @@ Ideally `<host|id>` is the site’s `host` in `wikiwire.toml`, but it can also b
     If you want to name a subfolder "shared" but don't want to trigger WikiWire, name the folder `_shared` instead. 
     Any path under `modules/` or `templates/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
 
+    The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/` and `templates/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title).
+
+    If the `common` option is disabled or false in `wikiwire.toml`, the action will error when reading from `common/`.
+
+    If you want to name a subfolder "common" but don't want to trigger WikiWire, name the folder `_common` instead.
+
 
 An example from the ObbyWiki's repository structure:
 

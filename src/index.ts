@@ -130,7 +130,7 @@ async function run() : Promise<void> {
 
     if (!fs.existsSync(full_config)) { throw new Error(`WikiWire config error: config not found: ${full_config}`); };
 
-    const { sites, shared : shared_enabled, path_to_site } = load_config(full_config);
+    const { sites, shared : shared_enabled, common : common_enabled, path_to_site } = load_config(full_config);
 
     for (const cred_site_id of site_creds_map.keys()) {
         if (!sites.has(cred_site_id)) {
@@ -158,10 +158,11 @@ async function run() : Promise<void> {
 
         const path_segment = parts[1];
 
-        if (path_segment === 'shared') {
-            // should make this more forgiving
-            if (!shared_enabled) {
-                throw new Error( `WikiWire: ${file} uses modules/shared or templates/shared; set shared = true in wikiwire.toml or move the file under a site path` );
+        if (path_segment === 'shared' || path_segment === 'common') {
+            const pool_enabled = path_segment === 'shared' ? shared_enabled : common_enabled;
+
+            if (!pool_enabled) {
+                throw new Error( `WikiWire: ${file} uses modules/${path_segment} or templates/${path_segment}; set ${path_segment} = true in wikiwire.toml or move the file under a site path` );
             };
 
             const full_file = path.join(workspace, file);
@@ -171,6 +172,11 @@ async function run() : Promise<void> {
             const ref = github.context.ref;
 
             for (const site_cfg of sites.values()) {
+                if (path_segment === 'common' && !site_cfg.common) {
+                    core.info(`WikiWire: skip ${file} for site ${site_cfg.id} (site is not enrolled in common)`);
+                    continue;
+                };
+
                 if (site_cfg.default_branch && ref !== `refs/heads/${site_cfg.default_branch}`) {
                     core.info( `WikiWire: skip ${file} for site ${site_cfg.id} (ref ${ref} is not refs/heads/${site_cfg.default_branch})` );
                     continue;
