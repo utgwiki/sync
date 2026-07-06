@@ -217,15 +217,15 @@ Suffix matching is ordered; the first match wins:
 
 | Pattern | Content model |
 |---------|----------------|
-| `*.template.wikitext` | (invalid under `modules/`; the action will fail) |
+| `*.template.wikitext` | (invalid under `modules/`; fails, or skipped when `ignore_content_model_errors = true`) |
 | `*.module.lua` | `scribunto` |
 | `*.module.luau` | `scribunto` |
 | `*.wikitext` | `wikitext` |
 | `*.css` | Per-site `css_content_model` in `wikiwire.toml` (default `sanitized-css`) |
 | `*.json` | `json` |
-| Anything else | Error: unsupported extension |
+| Anything else | Error: unsupported extension (skipped when `ignore_content_model_errors = true`) |
 
-(**TODO**: these should be ignored instead, such as README.md)
+Bare `.lua` or `.luau` extensions (without `.module.`) always error.
 
 ### Content models (non-special files under `templates/`)
 
@@ -238,7 +238,9 @@ Suffix matching uses the same order as under `modules/`, with one restriction: `
 | `*.wikitext` | `wikitext` |
 | `*.css` | Per-site `css_content_model` in `wikiwire.toml` (default `sanitized-css`) |
 | `*.json` | `json` |
-| Anything else | Error: unsupported extension |
+| Anything else | Error: unsupported extension (skipped when `ignore_content_model_errors = true`) |
+
+Bare `.lua` or `.luau` extensions (without `.module.`) always error.
 
 Some wikis may reject certain content models on `Template:` subpages; in that case the Action API returns an error, similar to unusual `Module:` subpages.
 
@@ -256,6 +258,7 @@ Place at the repository root unless you override with the `config_path` action i
 | `version` | integer | no | Config schema version; default `1`. Reserved for future use. |
 | `shared` | boolean | no | If true, enables `modules/shared/` and `templates/shared/`, synced to every `[[sites]]` entry. Default false. |
 | `common` | boolean | no | If true, enables `modules/common/` and `templates/common/`. Synced only to `[[sites]]` entries with `common = true`. Default false. |
+| `ignore_content_model_errors` | boolean | no | If true, skip files with unsupported extensions (e.g. `README.md`) instead of failing. Bare `.lua`/`.luau` and `.module.lua`/`.module.luau` under `templates/` still error. Default false. |
 
 ### `[[sites]]` (repeatable)
 

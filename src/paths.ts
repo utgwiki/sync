@@ -27,7 +27,14 @@ export function wiki_name_from_root(root_name : string) : string {
     return wiki_name;
 };
 
-export function content_model_for_repo_subfile(rel_under_root : string, css_content_model : string, opts : { allow_scribunto: boolean }) : string {
+function is_bare_lua_extension(rel_under_root : string) : boolean {
+    return (
+        (rel_under_root.endsWith('.lua') && !rel_under_root.endsWith('.module.lua')) ||
+        (rel_under_root.endsWith('.luau') && !rel_under_root.endsWith('.module.luau'))
+    );
+};
+
+export function content_model_for_repo_subfile(rel_under_root : string, css_content_model : string, opts : { allow_scribunto : boolean; ignore_content_model_errors ?: boolean }) : string | null {
     if (opts.allow_scribunto) {
         // any more cases and this should be a switch
         if (rel_under_root.endsWith('.module.lua')) return 'scribunto';
@@ -40,11 +47,18 @@ export function content_model_for_repo_subfile(rel_under_root : string, css_cont
     if (rel_under_root.endsWith('.css')) return css_content_model;
     if (rel_under_root.endsWith('.json')) return 'json';
 
+    if (is_bare_lua_extension(rel_under_root)) {
+        throw new Error( `WikiWire content model error: ${rel_under_root}: Scribunto files must use .module.lua or .module.luau, not .lua or .luau` );
+    };
+
+    if (opts.ignore_content_model_errors) { return null };
+
     throw new Error( `WikiWire content model error: unsupported subfile extension: ${rel_under_root} (allowed: .module.lua, .module.luau, .wikitext, .css, .json). *.module.lua/*.module.luau files are only allowed under modules/)`, );
 }
 
-export function map_repo_path(relative_path : string, options: { css_content_model ?: string } = {}) : mapped_path | null {
+export function map_repo_path(relative_path : string, options: { css_content_model ?: string; ignore_content_model_errors ?: boolean } = {}) : mapped_path | null {
     const css_content_model = options.css_content_model ?? 'sanitized-css';
+    const ignore_content_model_errors = options.ignore_content_model_errors ?? false;
     const normalized = relative_path.replace(/\\/g, '/').replace(/^\/+/, '');
 
     const parts = normalized.split('/').filter(Boolean);
@@ -65,7 +79,10 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
     const rel_under_root = rest.join('/');
 
     if (root === 'modules') {
-        if (rel_under_root.endsWith('.template.wikitext')) { throw new Error( `WikiWire: ${relative_path}: .template.wikitext belongs under templates/, not modules/`, ); };
+        if (rel_under_root.endsWith('.template.wikitext')) {
+            if (ignore_content_model_errors) { return null };
+            throw new Error( `WikiWire: ${relative_path}: .template.wikitext belongs under templates/, not modules/` );
+        };
 
         if (rel_under_root === `${wiki_name}.module.lua` || rel_under_root === `${wiki_name}.module.luau`) {
             return {
@@ -87,7 +104,10 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
 
         const content_model = content_model_for_repo_subfile(rel_under_root, css_content_model, {
             allow_scribunto: true,
+            ignore_content_model_errors,
         });
+
+        if (content_model === null) { return null };
 
         return {
             is_shared,
@@ -117,7 +137,12 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
         };
     }
 
-    const content_model = content_model_for_repo_subfile(rel_under_root, css_content_model, { allow_scribunto: false });
+    const content_model = content_model_for_repo_subfile(rel_under_root, css_content_model, {
+        allow_scribunto: false,
+        ignore_content_model_errors,
+    });
+
+    if (content_model === null) { return null };
 
     return {
         is_shared,
@@ -127,6 +152,6 @@ export function map_repo_path(relative_path : string, options: { css_content_mod
     };
 };
 
-export function content_model_for_module_subfile(rel_under_root : string, css_content_model : string) : string {
+export function content_model_for_module_subfile(rel_under_root : string, css_content_model : string) : string | null {
     return content_model_for_repo_subfile(rel_under_root, css_content_model, { allow_scribunto: true });
 };

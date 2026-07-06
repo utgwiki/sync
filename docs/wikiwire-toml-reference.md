@@ -30,6 +30,14 @@ Whether to enable the common sites folder or not. If set to false, WikiWire will
 common = false
 ```
 
+## ignore_content_model_errors (boolean)
+
+If true, files under `modules/` or `templates/` with unsupported extensions (for example `README.md`) are skipped instead of failing the sync. Scribunto files must still use `.module.lua` or `.module.luau`, however, as bare `.lua` or `.luau` extensions will always trigger an error, as will `.module.lua`/`.module.luau` files under `templates/`.
+
+```
+ignore_content_model_errors = true
+```
+
 ## [[sites]] (repeatable) (required)
 
 A `[[sites]]` defines a site. At minimum one of these entries must be provided.
@@ -71,6 +79,7 @@ If true, this site receives content from `modules/common/` and `templates/common
 version = 1
 shared = true
 common = true
+ignore_content_model_errors = true
 
 [[sites]]
 id = "obbywiki"

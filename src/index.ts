@@ -130,7 +130,7 @@ async function run() : Promise<void> {
 
     if (!fs.existsSync(full_config)) { throw new Error(`WikiWire config error: config not found: ${full_config}`); };
 
-    const { sites, shared : shared_enabled, common : common_enabled, path_to_site } = load_config(full_config);
+    const { sites, shared : shared_enabled, common : common_enabled, ignore_content_model_errors, path_to_site } = load_config(full_config);
 
     for (const cred_site_id of site_creds_map.keys()) {
         if (!sites.has(cred_site_id)) {
@@ -182,8 +182,11 @@ async function run() : Promise<void> {
                     continue;
                 };
 
-                const mapped = map_repo_path(file, { css_content_model: site_cfg.css_content_model });
-                if (!mapped) { continue };
+                const mapped = map_repo_path(file, { css_content_model: site_cfg.css_content_model, ignore_content_model_errors });
+                if (!mapped) {
+                    if (ignore_content_model_errors) { core.info(`WikiWire: skipped ${file} (unsupported extension or placement)`); };
+                    continue;
+                };
 
                 jobs.push({ file, mapped, site_cfg });
             };
@@ -200,8 +203,11 @@ async function run() : Promise<void> {
         const full_file = path.join(workspace, file);
         if (!fs.existsSync(full_file)) { core.info(`WikiWire: skipping missing or removed file ${file}`); continue };
 
-        const mapped = map_repo_path(file, { css_content_model: site_cfg.css_content_model });
-        if (!mapped) continue;
+        const mapped = map_repo_path(file, { css_content_model: site_cfg.css_content_model, ignore_content_model_errors });
+        if (!mapped) {
+            if (ignore_content_model_errors) { core.info(`WikiWire: skipped ${file} (unsupported extension or placement)`); };
+            continue;
+        };
 
         jobs.push({ file, mapped, site_cfg });
     };
