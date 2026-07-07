@@ -16,7 +16,7 @@ version = 1
 
 ## shared (boolean)
 
-Whether to enable the shared sites folder or not. If set to false, WikiWire will throw an error whenever it reads the /shared directory of modules/ or templates/.
+Whether to enable the shared sites folder or not. If set to false, WikiWire will throw an error whenever it reads the `/shared` directory of `modules/`, `templates/`, or `mediawiki/`.
 
 ```
 shared = false
@@ -24,7 +24,7 @@ shared = false
 
 ## common (boolean)
 
-Whether to enable the common sites folder or not. If set to false, WikiWire will throw an error whenever it reads the /common directory of modules/ or templates/. When enabled, content is synced only to `[[sites]]` entries that set `common = true`.
+Whether to enable the common sites folder or not. If set to false, WikiWire will throw an error whenever it reads the `/common` directory of `modules/`, `templates/`, or `mediawiki/`. When enabled, content is synced only to `[[sites]]` entries that set `common = true`.
 
 ```
 common = false
@@ -32,7 +32,7 @@ common = false
 
 ## ignore_content_model_errors (boolean)
 
-If true, files under `modules/` or `templates/` with unsupported extensions (for example `README.md`) are skipped instead of failing the sync. Scribunto files must still use `.module.lua` or `.module.luau`, however, as bare `.lua` or `.luau` extensions will always trigger an error, as will `.module.lua`/`.module.luau` files under `templates/`.
+If true, files under `modules/`, `templates/`, or `mediawiki/` with unsupported extensions (for example `README.md`) are skipped instead of failing the sync. Scribunto files must still use `.module.lua` or `.module.luau`, however, as bare `.lua` or `.luau` extensions will always trigger an error, as will `.module.lua`/`.module.luau` files under `templates/` or `mediawiki/`.
 
 ```
 ignore_content_model_errors = true
@@ -48,7 +48,7 @@ Stable site key (sessions, logs). Must be unique across rows.
 
 ### host (string)
 
-Directory name under modules/ and templates/. If omitted, defaults to id. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved).
+Directory name under `modules/`, `templates/`, and `mediawiki/`. If omitted, defaults to id. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved).
 
 ### api (string) (required)
 
@@ -64,11 +64,24 @@ If set, the action skips syncing when the workflow ref is not this branch (e.g. 
 
 ### css_content_model (string)
 
-Content model for `*.css` files under modules/ and templates/. Default is `sanitized-css`. Some wikis need `css`.
+Content model for `*.css` files under `modules/`, `templates/`, and `mediawiki/`. Default is `sanitized-css`. Some wikis need `css`.
 
 ### common (boolean)
 
-If true, this site receives content from `modules/common/` and `templates/common/` when top-level `common = true`. Default false.
+If true, this site receives content from `modules/common/`, `templates/common/`, and `mediawiki/common/` when top-level `common = true`. Default false.
+
+## mediawiki/ layout
+
+Most `MediaWiki:` pages are flat files directly under `mediawiki/<host|id>/`. Use a subdirectory only when a page has subpages.
+
+| Repository path | Wiki title | Content model |
+|-----------------|------------|---------------|
+| `mediawiki/example.com/Common.js` | `MediaWiki:Common.js` | `javascript` |
+| `mediawiki/example.com/Common.css` | `MediaWiki:Common.css` | per-site `css_content_model` |
+| `mediawiki/example.com/Sitenotice.wikitext` | `MediaWiki:Sitenotice` | `wikitext` |
+| `mediawiki/example.com/Sitenotice/ja` | `MediaWiki:Sitenotice/ja` | `wikitext` |
+
+Allowed flat file names: `<page>`, `<page>.wikitext`, `<page>.js`, `<page>.css`, `<page>.json`. Subpages map 1:1 by relative path under `<page>/`. Editing these pages requires the bot password grant **Edit the MediaWiki namespace and sitewide/user JSON**.
 
 # Configuration example
 
@@ -107,7 +120,7 @@ css_content_model = "css"
 | `config_path` | no | `wikiwire.toml` | Path to the TOML config. |
 | `ignore_path` | no | `.wikiwireignore` | Path to the ignore file (may be missing). |
 | `dry_run` | no | `false` | If `true`, no edits are sent (site-level `dry_run` in TOML still applies per site). |
-| `sync_all` | no | `false` | If set to `'override'`, every file under `modules/` and `templates/` from the workspace will be synced instead of those that changes per-commit. Requires a prior checkout of the repo. Not recommended as this may potentially be destructive. Previously this parameter accepted `true`, but that was changed in v0.3.0 |
+| `sync_all` | no | `false` | If set to `'override'`, every file under `modules/`, `templates/`, and `mediawiki/` from the workspace will be synced instead of those that changes per-commit. Requires a prior checkout of the repo. Not recommended as this may potentially be destructive. Previously this parameter accepted `true`, but that was changed in v0.3.0 |
 
 `dark_lua_compat` was removed in WikiWire v0.3.0, and supplying it as a parameter will produce an error.
 

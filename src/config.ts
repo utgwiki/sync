@@ -70,8 +70,8 @@ export function load_config(config_path : string) : { schema_version : number; s
         path_segment = s.host.trim();
 
         if (path_segment.length === 0) { throw new Error(`WikiWire: site "${s.id}" host must not be empty`); };
-        if (shared_enabled && path_segment === 'shared') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "shared" when shared = true (reserved for modules/shared and templates/shared)`, ); };
-        if (common_enabled && path_segment === 'common') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "common" when common = true (reserved for modules/common and templates/common)`, ); };
+        if (shared_enabled && path_segment === 'shared') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "shared" when shared = true (reserved for modules/shared, templates/shared, and mediawiki/shared)`, ); };
+        if (common_enabled && path_segment === 'common') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "common" when common = true (reserved for modules/common, templates/common, and mediawiki/common)`, ); };
 
         if (path_to_site.has(path_segment)) {
             const other = path_to_site.get(path_segment);

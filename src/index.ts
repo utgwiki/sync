@@ -11,6 +11,8 @@ import { parse_site_credentials } from './site_credentials';
 
 import type { Ignore } from 'ignore';
 
+const REPO_ROOTS = ['modules', 'templates', 'mediawiki'] as const;
+
 type push_payload = { after ?: string; before ?: string };
 
 type sync_job = {
@@ -70,7 +72,7 @@ async function list_changed_paths(opts : { workspace : string, sync_all : boolea
     if (sync_all) {
         const out: string[] = [];
 
-        for (const root of ['modules', 'templates']) {
+        for (const root of REPO_ROOTS) {
             walk_files(path.join(workspace, root), workspace, out);
         };
 
@@ -151,7 +153,7 @@ async function run() : Promise<void> {
     const jobs : sync_job[] = [];
 
     for (const file of changed) {
-        if (!file.startsWith('modules/') && !file.startsWith('templates/')) { continue };
+        if (!REPO_ROOTS.some((root) => file.startsWith(`${root}/`))) { continue };
 
         const parts = file.split('/').filter(Boolean);
         if (parts.some((p) => p.startsWith('_'))) { core.info(`WikiWire: skipped path with underscore prepended: "${file}"`); continue };
@@ -162,7 +164,7 @@ async function run() : Promise<void> {
             const pool_enabled = path_segment === 'shared' ? shared_enabled : common_enabled;
 
             if (!pool_enabled) {
-                throw new Error( `WikiWire: ${file} uses modules/${path_segment} or templates/${path_segment}; set ${path_segment} = true in wikiwire.toml or move the file under a site path` );
+                throw new Error( `WikiWire: ${file} uses ${parts[0]}/${path_segment}; set ${path_segment} = true in wikiwire.toml or move the file under a site path` );
             };
 
             const full_file = path.join(workspace, file);

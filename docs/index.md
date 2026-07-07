@@ -4,7 +4,7 @@ icon: lucide/info
 
 # Get started
 
-WikiWire is a powerful CI automation tool that can automatically upload modules and templates from your Git repositories to the live on-wiki versions in just seconds after each commit. With minimal setup, you can start syncing your GitHub repository to MediaWiki today. WikiWire is a completely free to use GitHub Action developed by the [Obby Wiki](https://obby.wiki).
+WikiWire is a powerful CI automation tool that can automatically upload modules, templates, and MediaWiki namespace pages from your Git repositories to the live on-wiki versions in just seconds after each commit. With minimal setup, you can start syncing your GitHub repository to MediaWiki today. WikiWire is a completely free to use GitHub Action developed by the [Obby Wiki](https://obby.wiki).
 
 ## Compatibility
 
@@ -26,7 +26,7 @@ WikiWire is a CI action you can add to your repository's CI as a new workflow, o
 
 ## Required repository layout
 
-To get started, ensure your repository matches the correct layout that WikiWire expects. Content will not be synced if neither a `modules/` nor a `templates/` folder is found in your repository.
+To get started, ensure your repository matches the correct layout that WikiWire expects. Content will not be synced unless at least one of `modules/`, `templates/`, or `mediawiki/` exists in your repository.
 
 ```sh
 .
@@ -38,10 +38,11 @@ To get started, ensure your repository matches the correct layout that WikiWire 
 └─ .wikiwireignore
 ```
 
-As seen above, WikiWire expects and *requires* that `modules/` and `templates/` are stored under the root level of the repository, or they will be ignored.
+As seen above, WikiWire expects `modules/`, `templates/`, and `mediawiki/` at the repository root. Paths outside these folders are ignored.
 
 - **Modules:** `modules/<host|id>/<name>/...`
 - **Templates:** `templates/<host|id>/<name>/...`
+- **MediaWiki namespace:** `mediawiki/<host|id>/<page>.<ext>` (flat files), or `mediawiki/<host|id>/<page>/...` when a page has subpages
 
 Ideally `<host|id>` is the site’s `host` in `wikiwire.toml`, but it can also be its `id` value if no `host` is set. Using the `host` value instead removes any ambiguity and is encouraged.
 
@@ -49,14 +50,14 @@ Ideally `<host|id>` is the site’s `host` in `wikiwire.toml`, but it can also b
 
     The `shared` key is a special key that can only be used as the shared directory when enabled in `wikiwire.toml`. 
 
-    Content under `modules/shared/` and `templates/shared/` are synced to **every** configured site. On-wiki titles are the same as for a single site (the `shared` segment is not part of the title). 
+    Content under `modules/shared/`, `templates/shared/`, and `mediawiki/shared/` are synced to **every** configured site. On-wiki titles are the same as for a single site (the `shared` segment is not part of the title). 
 
     If the `shared` option is disabled or false in `wikiwire.toml`, the action will error when reading from `shared/`.
 
     If you want to name a subfolder "shared" but don't want to trigger WikiWire, name the folder `_shared` instead. 
-    Any path under `modules/` or `templates/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
+    Any path under `modules/`, `templates/`, or `mediawiki/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
 
-    The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/` and `templates/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title).
+    The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/`, `templates/common/`, and `mediawiki/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title).
 
     If the `common` option is disabled or false in `wikiwire.toml`, the action will error when reading from `common/`.
 
@@ -73,6 +74,10 @@ modules/obbywiki.com/GroupLink/i18n/en.json
 templates/obbywiki.com/Infobox/Infobox.template.wikitext
 templates/obbywiki.com/MonthNav/MonthNav.template.wikitext
 templates/obbywiki.com/MonthNav/styles.css
+mediawiki/obbywiki.com/Sitenotice.wikitext
+mediawiki/obbywiki.com/Common.js
+mediawiki/obbywiki.com/Common.css
+mediawiki/obbywiki.com/Sitenotice/ja
 modules/shared/CommonUtil/CommonUtil.module.lua
 ```
 
@@ -124,6 +129,8 @@ on:
       - 'modules/*'
       - 'templates/**'
       - 'templates/*'
+      - 'mediawiki/**'
+      - 'mediawiki/*'
 
 jobs:
   wikiwire:
@@ -175,7 +182,7 @@ Next, upload your bot password as a secret into your GitHub repository. For help
 
 ## Testing the workflow
 
-After completing every step above, you should be ready to test WikiWire. Make any change to a module or a template and WikiWire should automatically sync it if everything is correct. To test your layout before actually syncing content, use the `dry_run` parameter.
+After completing every step above, you should be ready to test WikiWire. Make any change to a module, template, or MediaWiki configuration page and WikiWire should automatically sync it if everything is correct. To test your layout before actually syncing content, use the `dry_run` parameter.
 
 If you are having trouble setting up WikiWire, use our repository as a guide: https://github.com/obbywiki/modules.
 

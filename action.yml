@@ -1,5 +1,5 @@
 name: WikiWire
-description: Sync your Git repositories with your live on-wiki MediaWiki modules and templates
+description: Sync your Git repositories with your live on-wiki MediaWiki modules, templates, and MediaWiki configuration pages
 branding:
   icon: upload-cloud
   color: blue
@@ -30,7 +30,7 @@ inputs:
     required: false
     default: "false"
   sync_all:
-    description: NOT RECOMMENDED FOR MOST USE-CASES! If true ("override"), sync all files under modules/ and templates/ from the workspace instead of commit diffs (use for workflow_dispatch or full sync)
+    description: NOT RECOMMENDED FOR MOST USE-CASES! If true ("override"), sync all files under modules/, templates/, and mediawiki/ from the workspace instead of commit diffs (use for workflow_dispatch or full sync)
     required: false
     default: "false"
 

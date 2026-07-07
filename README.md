@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > WikiWire is currently experimental. Please use cautiously and avoid potentially destructive configurations such as `sync_all` and consider testing your configurations with `dry_run`s first.
 
-WikiWire is a GitHub Action that syncs files under `modules/` and `templates/` inside your Git repository into a live MediaWiki site via the [MediaWiki Action API](https://www.mediawiki.org/wiki/API:Action_API). WikiWire allows for smooth automated workflows that make your GitHub repository the primary authority over your content and seem less like a backup.
+WikiWire is a GitHub Action that syncs files under `modules/`, `templates/`, and `mediawiki/` inside your Git repository into a live MediaWiki site via the [MediaWiki Action API](https://www.mediawiki.org/wiki/API:Action_API). WikiWire allows for smooth automated workflows that make your GitHub repository the primary authority over your content and seem less like a backup.
 
 WikiWire was developed by the Obby Wiki to streamline sharing modules across not only GitHub and MediaWiki, but also across multiple wikis. While complex, it is possible to transpile Luau to Lua 5.1 and upload it via this tool, as seen in [`obbywiki/modules`](https://github.com/obbywiki/modules).
 
@@ -25,7 +25,7 @@ WikiWire is a CI action you can add to your repository's CI as a new workflow, o
 
 ## Required repository layout
 
-To get started, ensure your repository matches the correct layout that WikiWire expects. Content will not be synced if neither a `modules/` nor a `templates/` folder is found in your repository.
+To get started, ensure your repository matches the correct layout that WikiWire expects. Content will not be synced unless at least one of `modules/`, `templates/`, or `mediawiki/` exists in your repository.
 
 ```sh
 .
@@ -37,24 +37,25 @@ To get started, ensure your repository matches the correct layout that WikiWire 
 └─ .wikiwireignore
 ```
 
-As seen above, WikiWire expects and *requires* that `modules/` and `templates/` are stored under the root level of the repository, or they will be ignored.
+As seen above, WikiWire expects `modules/`, `templates/`, and `mediawiki/` at the repository root. Paths outside these folders are ignored.
 
 - **Modules:** `modules/<host|id>/<name>/...`
 - **Templates:** `templates/<host|id>/<name>/...`
+- **MediaWiki namespace:** `mediawiki/<host|id>/<page>.<ext>` (flat files), or `mediawiki/<host|id>/<page>/...` when a page has subpages
 
 Ideally `<host|id>` is the site’s `host` in `wikiwire.toml`, but it can also be its `id` value if no `host` is set. Using the `host` value instead removes any ambiguity and is encouraged.
 
 > [!TIP] 
 > The `shared` key is a special key that can only be used as the shared directory when enabled in `wikiwire.toml`. 
 > 
-> Content under `modules/shared/` and `templates/shared/` are synced to **every** configured site. On-wiki titles are the same as for a single site (the `shared` segment is not part of the title). 
+> Content under `modules/shared/`, `templates/shared/`, and `mediawiki/shared/` are synced to **every** configured site. On-wiki titles are the same as for a single site (the `shared` segment is not part of the title). 
 > 
 > If the `shared` option is disabled or false in `wikiwire.toml`, the action will error when reading from `shared/`.
 > 
 > If you want to name a subfolder "shared" but don't want to trigger WikiWire, name the folder `_shared` instead. 
-> Any path under `modules/` or `templates/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
+> Any path under `modules/`, `templates/`, or `mediawiki/` that contains a **path component starting with `_`** is skipped (not synced). Examples: `modules/_legacy/...`, `modules/example.com/MyModule/_draft/example.wikitext`, `modules/example.com/shared/_imported/...`.
 >
-> The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/` and `templates/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title). Use `common/` for things like Module:Arguments.
+> The `common` key works like `shared`, but each site must opt in. When `common = true` in `wikiwire.toml`, content under `modules/common/`, `templates/common/`, and `mediawiki/common/` is synced only to `[[sites]]` entries that set `common = true`. On-wiki titles are the same as for a single site (the `common` segment is not part of the title). Use `common/` for things like Module:Arguments.
 >
 > If the `common` option is disabled or false in `wikiwire.toml`, the action will error when reading from `common/`.
 >
@@ -71,6 +72,11 @@ modules/obbywiki.com/GroupLink/i18n/en.json
 templates/obbywiki.com/Infobox/Infobox.template.wikitext
 templates/obbywiki.com/MonthNav/MonthNav.template.wikitext
 templates/obbywiki.com/MonthNav/styles.css
+mediawiki/obbywiki.com/Sitenotice.wikitext
+mediawiki/obbywiki.com/Common.js
+mediawiki/obbywiki.com/Common.css
+mediawiki/obbywiki.com/Citizen.js
+mediawiki/obbywiki.com/Sitenotice/ja
 modules/shared/CommonUtil/CommonUtil.module.lua
 ```
 
@@ -121,6 +127,8 @@ on:
       - 'modules/*'
       - 'templates/**'
       - 'templates/*'
+      - 'mediawiki/**'
+      - 'mediawiki/*'
 
 jobs:
   wikiwire:
@@ -202,12 +210,17 @@ For additional details, see the specification here.
 | `templates` | `templates/<path_segment>/<root>/<root>.template.wikitext` | `Template:<root>` | `wikitext` |
 | `templates` | `templates/<path_segment>/<root>/doc.wikitext` | `Template:<root>/doc` | `wikitext` |
 | `templates` | `templates/<path_segment>/<root>/<any other path>` | `Template:<root>/<any other path>` | See below |
+| `mediawiki` | `mediawiki/<path_segment>/<page>.<ext>` or `<page>` | `MediaWiki:<page>` | Inferred from file name (see below) |
+| `mediawiki` | `mediawiki/<path_segment>/<root>/doc.wikitext` | `MediaWiki:<root>/doc` | `wikitext` |
+| `mediawiki` | `mediawiki/<path_segment>/<root>/<any other path>` | `MediaWiki:<root>/<any other path>` | See below |
 
 Any other file under `modules/<path_segment>/<root>/` maps 1:1: the wiki subpage path is exactly the relative path under `<root>/`, including nested directories (for example `i18n/en.json` becomes `Module:GroupLink/i18n/en.json`).
 
 The same 1:1 rule applies under `templates/<path_segment>/<root>/` for every path except the main `<root>.template.wikitext` (which maps to the bare `Template:<root>`) and `doc.wikitext` (which maps to `Template:<root>/doc`). For example `styles.css` becomes `Template:MonthNav/styles.css`.
 
-Templates synced to `Template:` must live under `templates/`, not `modules/`. You can still use regular wikitext files under a template root like any other subpath.
+Most `MediaWiki:` pages have no subpages and live as flat files directly under `mediawiki/<path_segment>/` (for example `mediawiki/example.org/Sitenotice.wikitext` → `MediaWiki:Sitenotice`, `mediawiki/example.org/Common.js` → `MediaWiki:Common.js`). When a page does have subpages, use a directory: `mediawiki/example.org/Sitenotice/ja` → `MediaWiki:Sitenotice/ja`. The nested `mediawiki/<path_segment>/<root>/<root>.<ext>` layout is also still accepted.
+
+Templates synced to `Template:` must live under `templates/`, not `modules/`. MediaWiki namespace pages must live under `mediawiki/`. You can still use regular wikitext files under a template root like any other subpath.
 
 Labels will be ignored on sync. Anything before the first colon (`:`) is considered a label (e.g., 'Label:Name' will simply be 'Name', which will then be synced to Module:Name because it is under the modules/ folder). This only counts for the first colon, and anything after will still be passed. This makes it easier to mark modules as imported while still syncing them.
 
@@ -244,6 +257,24 @@ Bare `.lua` or `.luau` extensions (without `.module.`) always error.
 
 Some wikis may reject certain content models on `Template:` subpages; in that case the Action API returns an error, similar to unusual `Module:` subpages.
 
+### Content models (non-special files under `mediawiki/`)
+
+The main page is a flat file at `mediawiki/<path_segment>/<page>.<ext>` (or extensionless `<page>` for wikitext). Content model is inferred from the file name: `.wikitext` or extensionless -> `wikitext`; page names ending in `.js` -> `javascript`; `.css` -> per-site `css_content_model`; `.json` -> `json`.
+
+| Pattern | Content model |
+|---------|----------------|
+| `*.module.lua` | (invalid under `mediawiki/`; the action will fail) |
+| `*.module.luau` | (invalid under `mediawiki/`; the action will fail) |
+| `*.template.wikitext` | (invalid under `mediawiki/`; fails, or skipped when `ignore_content_model_errors = true`) |
+| `*.wikitext` | `wikitext` |
+| `*.js` | `javascript` |
+| `*.css` | Per-site `css_content_model` in `wikiwire.toml` (default `sanitized-css`) |
+| `*.json` | `json` |
+| Extensionless basename (e.g. `ja`) | `wikitext` |
+| Anything else | Error: unsupported extension (skipped when `ignore_content_model_errors = true`) |
+
+Editing `MediaWiki:` pages requires the bot password grant **Edit the MediaWiki namespace and sitewide/user JSON**.
+
 
 ## Configuration: `wikiwire.toml`
 
@@ -256,21 +287,21 @@ Place at the repository root unless you override with the `config_path` action i
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `version` | integer | no | Config schema version; default `1`. Reserved for future use. |
-| `shared` | boolean | no | If true, enables `modules/shared/` and `templates/shared/`, synced to every `[[sites]]` entry. Default false. |
-| `common` | boolean | no | If true, enables `modules/common/` and `templates/common/`. Synced only to `[[sites]]` entries with `common = true`. Default false. |
-| `ignore_content_model_errors` | boolean | no | If true, skip files with unsupported extensions (e.g. `README.md`) instead of failing. Bare `.lua`/`.luau` and `.module.lua`/`.module.luau` under `templates/` still error. Default false. |
+| `shared` | boolean | no | If true, enables `modules/shared/`, `templates/shared/`, and `mediawiki/shared/`, synced to every `[[sites]]` entry. Default false. |
+| `common` | boolean | no | If true, enables `modules/common/`, `templates/common/`, and `mediawiki/common/`. Synced only to `[[sites]]` entries with `common = true`. Default false. |
+| `ignore_content_model_errors` | boolean | no | If true, skip files with unsupported extensions (e.g. `README.md`) instead of failing. Bare `.lua`/`.luau` and `.module.lua`/`.module.luau` under `templates/` or `mediawiki/` still error. Default false. |
 
 ### `[[sites]]` (repeatable)
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `id` | string | yes | Stable site key (sessions, logs). Must be unique across rows. |
-| `host` | string | no | Directory name under `modules/` and `templates/`. If omitted, defaults to `id`. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved). |
+| `host` | string | no | Directory name under `modules/`, `templates/`, and `mediawiki/`. If omitted, defaults to `id`. Must be unique across sites. Cannot be `shared` when `shared = true` or `common` when `common = true` (those names are reserved). |
 | `api` | string | yes | Full MediaWiki API URL, e.g. `https://example.org/w/api.php`. |
 | `dry_run` | boolean | no | If true, only log planned edits; no `action=edit` requests for this site. |
 | `default_branch` | string | no | If set, the action skips syncing when the workflow ref is not this branch (e.g. `refs/heads/main`). |
-| `css_content_model` | string | no | Content model for `*.css` files under `modules/` and `templates/`. Default `sanitized-css`. Some wikis need `css`. |
-| `common` | boolean | no | If true, this site receives content from `modules/common/` and `templates/common/` when top-level `common = true`. Default false. |
+| `css_content_model` | string | no | Content model for `*.css` files under `modules/`, `templates/`, and `mediawiki/`. Default `sanitized-css`. Some wikis need `css`. |
+| `common` | boolean | no | If true, this site receives content from `modules/common/`, `templates/common/`, and `mediawiki/common/` when top-level `common = true`. Default false. |
 
 Example:
 
@@ -325,7 +356,7 @@ Please note that WikiWire is currently a BETA and this shouldn't be required in 
 | `config_path` | no | `wikiwire.toml` | Path to the TOML config. |
 | `ignore_path` | no | `.wikiwireignore` | Path to the ignore file (may be missing). |
 | `dry_run` | no | `false` | If `true`, no edits are sent (site-level `dry_run` in TOML still applies per site). |
-| `sync_all` | no | `false` | If set to `'override'`, every file under `modules/` and `templates/` from the workspace will be synced instead of those that changes per-commit. Requires a prior checkout of the repo. Not recommended as this may potentially be destructive. Previously this parameter accepted `true`, but that was changed in v0.3.0 |
+| `sync_all` | no | `false` | If set to `'override'`, every file under `modules/`, `templates/`, and `mediawiki/` from the workspace will be synced instead of those that changes per-commit. Requires a prior checkout of the repo. Not recommended as this may potentially be destructive. Previously this parameter accepted `true`, but that was changed in v0.3.0 |
 
 `dark_lua_compat` was removed in WikiWire v0.3.0, and supplying it as a parameter will produce an error.
 
@@ -346,6 +377,8 @@ on:
       - 'modules/*'
       - 'templates/**'
       - 'templates/*'
+      - 'mediawiki/**'
+      - 'mediawiki/*'
 
 jobs:
   wikiwire:
