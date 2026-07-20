@@ -2,182 +2,95 @@ import fs from 'node:fs';
 import TOML from '@iarna/toml';
 
 export type site_config = {
-  id: string;
-  site: string;
-  api: string;
-  dry_run: boolean;
-  default_branch: string | null;
-  css_content_model: string;
+  id : string;
+  api : string;
+  dry_run : boolean;
+
+  default_branch : string | null;
+  css_content_model : string;
+  common : boolean;
 };
 
-export type group_config = {
-  id: string;
-  sites: string[];
+// toml configs arent typed
+
+type site_entry = {
+  id ?: unknown;
+  api ?: unknown;
+  dry_run ?: unknown;
+
+  default_branch ?: unknown;
+  css_content_model ?: unknown;
+  host ?: unknown;
+  common ?: unknown;
 };
 
-type toml_site_entry = {
-  id?: unknown;
-  site?: unknown;
-  api?: unknown;
-  dry_run?: unknown;
-  default_branch?: unknown;
-  css_content_model?: unknown;
+
+type root_config = {
+  version ?: unknown;
+  shared ?: unknown;
+  common ?: unknown;
+  ignore_content_model_errors ?: unknown;
+  sites ?: unknown;
 };
 
-type toml_group_entry = {
-  id?: unknown;
-  sites?: unknown;
-};
+export function load_config(config_path : string) : { schema_version : number; shared : boolean; common : boolean; ignore_content_model_errors : boolean; sites : Map<string, site_config>; path_to_site : Map<string, site_config> } {
+    const raw = fs.readFileSync(config_path, 'utf8');
+    const data = TOML.parse(raw) as root_config;
 
-type toml_root = {
-  version?: unknown;
-  shared?: unknown;
-  sites?: unknown;
-  groups?: unknown;
-};
+    if (!Array.isArray(data.sites)) { throw new Error('WikiWire config error: wikiwire.toml must contain entries via [[sites]]'); };
 
-export function load_config(config_path: string): {
-  version: number;
-  shared: boolean;
-  sites: Map<string, site_config>;
-  path_to_site: Map<string, site_config>;
-  groups: Map<string, group_config>;
-} {
-  const raw = fs.readFileSync(config_path, 'utf8');
-  const data = TOML.parse(raw) as toml_root;
+    const sites = new Map<string, site_config>();
+    const path_to_site = new Map<string, site_config>();
 
-  if (!Array.isArray(data.sites)) {
-    throw new Error('WikiWire: wikiwire.toml must contain [[sites]] entries');
-  }
+    const shared_enabled = Boolean(data.shared);
+    const common_enabled = Boolean(data.common);
 
-  const shared = Boolean(data.shared);
+    for (const entry of data.sites) {
+        const s = entry as site_entry;
 
-  const sites = new Map<string, site_config>();
-  const path_to_site = new Map<string, site_config>();
+        if (typeof s.id !== 'string' || typeof s.api !== 'string') { throw new Error('WikiWire config error: each site at minimum needs a string `id` and `api` value'); }
 
-  for (const entry of data.sites) {
-    const s = entry as toml_site_entry;
 
-    if (typeof s.id !== 'string' || typeof s.api !== 'string') {
-      throw new Error('WikiWire: each site needs string id and api');
-    }
+        const local_site_config : site_config = {
+            id : s.id,
+            api : s.api.trim(),
 
-    const trimmed_id = s.id.trim();
-    if (trimmed_id.length === 0) {
-      throw new Error('WikiWire: site id must not be empty or whitespace-only');
-    }
+            default_branch: typeof s.default_branch === 'string' ? s.default_branch : null,
+            css_content_model: typeof s.css_content_model === 'string' ? s.css_content_model : 'sanitized-css',
 
-    const trimmed_api = s.api.trim();
-    if (trimmed_api.length === 0) {
-      throw new Error(`WikiWire: site "${trimmed_id}" api must not be empty or whitespace-only`);
-    }
+            dry_run : Boolean(s.dry_run),
+            common : Boolean(s.common),
+        };
 
-    let path_segment = trimmed_id;
-    if (s.site !== undefined && s.site !== null) {
-      if (typeof s.site !== 'string') {
-        throw new Error(`WikiWire: site "${trimmed_id}" site must be a string if set`);
-      }
 
-      path_segment = s.site.trim();
-      if (path_segment.length === 0) {
-        throw new Error(`WikiWire: site "${trimmed_id}" site must not be empty`);
-      }
-    }
+        let path_segment = s.id;
+        
+        if (typeof s.host !== 'string') { throw new Error(`WikiWire config error: site "${s.id}" host must be a string if set`); };
 
-    const site_cfg: site_config = {
-      id: trimmed_id,
-      site: path_segment,
-      api: trimmed_api,
-      dry_run: Boolean(s.dry_run),
-      default_branch: typeof s.default_branch === 'string' ? s.default_branch : null,
-      css_content_model:
-        typeof s.css_content_model === 'string' ? s.css_content_model : 'sanitized-css',
+        path_segment = s.host.trim();
+
+        if (path_segment.length === 0) { throw new Error(`WikiWire: site "${s.id}" host must not be empty`); };
+        if (shared_enabled && path_segment === 'shared') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "shared" when shared = true (reserved for modules/shared, templates/shared, and mediawiki/shared)`, ); };
+        if (common_enabled && path_segment === 'common') { throw new Error( `WikiWire config error: site "${s.id}" cannot use path segment "common" when common = true (reserved for modules/common, templates/common, and mediawiki/common)`, ); };
+
+        if (path_to_site.has(path_segment)) {
+            const other = path_to_site.get(path_segment);
+
+            throw new Error( `WikiWire config error: duplicate repo path segment "${path_segment}" (sites "${other?.id}" and "${local_site_config.id}")`, );
+        };
+
+        sites.set(local_site_config.id, local_site_config);
+        path_to_site.set(path_segment, local_site_config);
     };
 
-    if (path_segment === 'shared') {
-      throw new Error(
-        `WikiWire: site "${trimmed_id}" cannot use path segment "shared" (reserved for modules/shared and templates/shared)`,
-      );
-    }
+    if (sites.size === 0) { throw new Error('WikiWire: wikiwire.toml must define at least one [[sites]] entry'); };
 
-    if (path_segment === 'groups') {
-      throw new Error(
-        `WikiWire: site "${trimmed_id}" cannot use path segment "groups" (reserved for groups feature)`,
-      );
-    }
-
-    if (sites.has(site_cfg.id)) {
-      throw new Error(`WikiWire: duplicate site id "${site_cfg.id}" in configuration`);
-    }
-
-    if (path_to_site.has(path_segment)) {
-      const other = path_to_site.get(path_segment);
-      throw new Error(
-        `WikiWire: duplicate repo path segment "${path_segment}" (sites "${other?.id}" and "${site_cfg.id}")`,
-      );
-    }
-
-    sites.set(site_cfg.id, site_cfg);
-    path_to_site.set(path_segment, site_cfg);
-  }
-
-  const groups = new Map<string, group_config>();
-  if (Array.isArray(data.groups)) {
-    for (const entry of data.groups) {
-      const g = entry as toml_group_entry;
-      if (typeof g.id !== 'string' || !Array.isArray(g.sites)) {
-        throw new Error('WikiWire: each group needs string id and array of sites');
-      }
-
-      const group_id = g.id.trim();
-      if (group_id.length === 0) {
-        throw new Error('WikiWire: group id must not be empty');
-      }
-
-      if (group_id === 'shared' || group_id === 'groups') {
-          throw new Error(`WikiWire: group id cannot be "${group_id}" (reserved)`);
-      }
-
-      const group_sites: string[] = [];
-      const seen_sites = new Set<string>();
-      for (const s of g.sites) {
-        if (typeof s !== 'string') {
-          throw new Error(`WikiWire: group "${group_id}" site list must contain strings`);
-        }
-        if (!sites.has(s)) {
-          throw new Error(`WikiWire: group "${group_id}" references unknown site "${s}" (site not defined in [[sites]])`);
-        }
-        if (seen_sites.has(s)) {
-          throw new Error(`WikiWire: group "${group_id}" contains duplicate site "${s}"`);
-        }
-        seen_sites.add(s);
-        group_sites.push(s);
-      }
-
-      if (groups.has(group_id)) {
-        throw new Error(`WikiWire: duplicate group id "${group_id}"`);
-      }
-
-      if (path_to_site.has(group_id)) {
-           throw new Error(`WikiWire: group id "${group_id}" conflicts with a site path segment`);
-      }
-
-      groups.set(group_id, {
-        id: group_id,
-        sites: group_sites,
-      });
-    }
-  }
-
-  if (sites.size === 0) {
-    throw new Error('WikiWire: wikiwire.toml must define at least one [[sites]] entry');
-  }
-
-  return {
-    version: typeof data.version === 'number' ? data.version : 1,
-    shared,
-    sites,
-    path_to_site,
-    groups,
-  };
-}
+    return { 
+        schema_version: typeof data.version === 'number' ? data.version : 1,
+        shared: shared_enabled,
+        common: common_enabled,
+        ignore_content_model_errors: Boolean(data.ignore_content_model_errors),
+        sites,
+        path_to_site
+    };
+};
