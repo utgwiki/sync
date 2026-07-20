@@ -1,10 +1,9 @@
 <!-- this code is shared with another wiki, please edit the template in https://github.com/utgwiki/wikiwire instead of here.
 any changes made here will be overwritten without warning --><div class="mpdiscover" style="display: flex; flex-direction: row; width: 100%; gap: 5px; margin-bottom: 10px; flex-wrap: wrap"><!--
--->{{#vardefine: recode | <span class="box2 socialbutton main"><span>Recode</span></span> }}
-{{#vardefine: legacy | <span class="box2 socialbutton legacy"><span>Legacy</span></span> }}
-{{#vardefine: dev | <span class="box2 socialbutton dev"><span>Dev</span></span> }}
-{{#vardefine: community | <span class="box2 socialbutton community"><span>Community</span></span> }}
-{{#vardefine: farm | <span class="box2 socialbutton farm"><span>Farm</span></span> }}<!--
+-->{{#vardefine: recode | {{#floatingui: <span class="box2 socialbutton main"><span>Recode</span></span>|The newest, 2023 version of Untitled Tag Game}} }}
+{{#vardefine: legacy | {{#floatingui: <span class="box2 socialbutton legacy"><span>Legacy</span></span>|The old, 2021 version of Untitled Tag Game}} }}
+{{#vardefine: dev | {{#floatingui: <span class="box2 socialbutton dev"><span>Dev</span></span>|Developer documentation for contributors and map makers}} }}
+{{#vardefine: farm | {{#floatingui: <span class="box2 socialbutton farm"><span>Farm</span></span>|Untitled Farming Game, a seperate game from _create}} }}<!--
 
 
 -->{{#ifeq: {{FULLPAGENAME}} | Untitled Tag Game Wiki | <div class="fakeselflink">{{#var:recode}}</div>
