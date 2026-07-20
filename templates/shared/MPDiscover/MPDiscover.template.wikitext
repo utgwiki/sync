@@ -1,4 +1,4 @@
-<!-- this code is shared with another wiki, please edit the template in https://github.com/utgwiki/wikiwire instead of here.
+<!-- this code is shared with another wiki, please edit the template in https://github.com/utgwiki/sync instead of here.
 any changes made here will be overwritten without warning --><div class="mpdiscover" style="display: flex; flex-direction: row; width: 100%; gap: 5px; margin-bottom: 10px; flex-wrap: wrap"><!--
 -->{{#vardefine: recode | <span class="box2 socialbutton main"><span>Recode</span></span> }}
 {{#vardefine: legacy | <span class="box2 socialbutton legacy"><span>Legacy</span></span> }}
