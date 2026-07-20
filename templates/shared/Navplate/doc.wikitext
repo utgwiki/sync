@@ -1,4 +1,4 @@
-<!-- this code is shared with multiple wikis, please edit the module in https://github.com/utgwiki/sync instead of here.
+<!-- this code is shared with multiple wikis, please edit the module in https://github.com/utgwiki/wikiwire instead of here.
 any changes made here will be overwritten without warning -->Navplate allows a navigational template to be set up relatively quickly by supplying it with one or more lists of links, similar to [https://en.wikipedia.org/wiki/Template:Navbox Template:Navbox] on Wikipedia.
 
 == Usage ==
