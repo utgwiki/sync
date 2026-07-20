@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const html = document.documentElement;
     const body = document.body;
-    const pageContainer = document.querySelector('.citizen-page-container');
+    const pageContainer = document.querySelector('.citizen-body');
     
     if (!pageContainer) return;
 
-    // --- 1. SETUP WRAPPER ---
+    // setup wrapper
     let sidewrapper = document.querySelector('.sidewrapper');
     if (!sidewrapper) {
         sidewrapper = document.createElement('div');
@@ -15,25 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const sideicons = sidewrapper.querySelector('.sideicons');
 
-    // --- 2. CLASS SYNCING (ns-* classes) ---
-    let lastNSState = "";
-    const syncNSClasses = () => {
-        const nsClasses = Array.from(body.classList).filter(c => c.startsWith("ns-"));
-        const newState = nsClasses.sort().join(' ');
-
-        if (newState === lastNSState) return;
-        
-        requestAnimationFrame(() => {
-            const currentHTMLClasses = Array.from(html.classList);
-            currentHTMLClasses.forEach(c => {
-                if (c.startsWith("ns-")) html.classList.remove(c);
-            });
-            if (nsClasses.length) html.classList.add(...nsClasses);
-            lastNSState = newState;
-        });
-    };
-
-    // --- 3. THE TELEPORT FUNCTION ---
+    // move tab to sideicons
     const targetSelector = '.mw-indicators, .utg-tabs';
     const ignoreSelector = '.ext-WikiEditor-realtimepreview-preview';
 
@@ -48,14 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- 4. OBSERVER ---
+    // observer
     const observer = new MutationObserver((mutations) => {
-        let shouldSyncClasses = false;
-
         for (const mutation of mutations) {
-            if (mutation.type === 'attributes') {
-                shouldSyncClasses = true;
-            } else if (mutation.type === 'childList') {
+            if (mutation.type === 'childList') {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeType === 1) {
                         // Skip entire branches if they are the preview container
@@ -70,22 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         }
-
-        if (shouldSyncClasses) syncNSClasses();
     });
 
-    // --- 5. INITIALIZE ---
-    syncNSClasses();
+    // initialise
     teleport();
 
     setTimeout(() => {
-        syncNSClasses();
         teleport();
     }, 100);
 
     observer.observe(body, {
-        attributes: true,
-        attributeFilter: ['class'],
         childList: true,
         subtree: true
     });
